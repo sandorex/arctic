@@ -1,7 +1,10 @@
-#define PORT_IR PORTB
-#define PIN_IR 9
+#define VERSION "V0.1.0"
 
-#define SCREEN_ADDRESS 0x3C
+#define ENC1 4
+#define ENC2 7
+#define ENC_BTN 2
+#define ENC_BTN_ACTIVE_LOW true
+#define ENC_BTN_PULLUP true
 
 #include "ir_codes.h"
 #include <Arduino.h>
@@ -9,7 +12,10 @@
 #include <stdint.h>
 #include <RotaryEncoder.h>
 #include <OneButton.h>
+#include <avr/wdt.h>
+#include <avr/power.h>
 
+#define SCREEN_ADDRESS 0x3C
 #define SSD1306_NO_SPLASH // do not show splashcreen
 #include <Adafruit_SSD1306.h>
 
@@ -17,10 +23,15 @@
 #define SCREEN_HEIGHT 32
 
 enum Menu {
-    ON_TIME,
-    ENABLED,
+    PAGE_ONE,
+    ON_TIME = PAGE_ONE,
     OFF_TIME,
-    TEST,
+    ENABLED,
+    SLEEP,
+
+    PAGE_TWO,
+    TEST_OFF = PAGE_TWO,
+    TEST_ON,
 
     // how many items there are
     LENGTH
@@ -28,19 +39,19 @@ enum Menu {
 
 // by default it uses A5 and A4 for SCK/SDA
 Adafruit_SSD1306 display(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, -1);
+RotaryEncoder encoder(ENC1, ENC2, RotaryEncoder::LatchMode::FOUR3);
+OneButton btn = OneButton(ENC_BTN, ENC_BTN_ACTIVE_LOW, ENC_BTN_PULLUP);
 
-RotaryEncoder encoder(4, 7, RotaryEncoder::LatchMode::FOUR3);
+long pos = 0;
+uint8_t menu_index = Menu::ENABLED;
 
-OneButton btn = OneButton(
-    2,           // Input pin for the button
-    true,        // Button is active LOW
-    true         // Enable internal pull-up resistor
-);
-
-int pos = 0;
-int menu_index = 0;
+// is the item being edited
 bool menu_editing = false;
-bool enabled = true;
+
+// is the device enabled
+bool enabled = false;
+
+// is air conditioner assumed running
 bool air_conditioner = false;
 
 #define MIN_ON_TIME 5
@@ -52,93 +63,151 @@ bool air_conditioner = false;
 uint8_t on_time = 5;
 uint8_t off_time = 25;
 
+// waiting for the next interval
+bool waiting = false;
+
+// which cycle in the waiting (1 cycle = 8 seconds)
+uint16_t waiting_cycles = 0;
+
+void updateScreen();
+void deep_sleep();
+
+volatile bool timer = false;
+
 void setup() {
     Serial.begin(9600);
+
+    ir_setup();
 
     // wait for display
     delay(500);
 
     if(!display.begin(SSD1306_SWITCHCAPVCC, SCREEN_ADDRESS)) {
+        Serial.println("Error intializing display.. halting");
         for(;;);
     }
+
+    power_adc_disable();
 
     // dim to lower power consumption
     display.dim(true);
 
-    // TODO boot splash
-
     display.clearDisplay();
     display.setTextSize(1);
     display.setTextColor(WHITE);
-    display.setCursor(0, 0);
-    display.println(F("Hello"));
+    display.setCursor(25, 12);
+    display.print(F("ARCTIC " VERSION));
     display.display();
 
-    pinMode(13, OUTPUT);
+    // display.ssd1306_command(SSD1306_DISPLAYOFF);
 
+    // pinMode(PIN_IR, OUTPUT);
+
+    delay(3000);
+
+    // TODO it keeps resetting!
+    // noInterrupts();
+    //
+    // // NOTE intentionally after delay so if interrupt is not correctly defined it
+    // // wont reset loop
+    // // interrupt every 8s
+    // MCUSR &= ~(1 << WDRF);
+    // WDTCSR |= _BV(WDCE);
+    // // WDTCSR |= (_BV(WDCE) | _BV(WDE));
+    // WDTCSR = _BV(WDIE) | _BV(WDP3) | _BV(WDP0);
+    //
+    // interrupts();
+
+    // show the actual interface
+    updateScreen();
+
+    // interrupts();
     // attachInterrupt(digitalPinToInterrupt(2), encoder_button, CHANGE);
 }
 
-// TODO add version somewhere on screen
+void menuTwo() {
+    display.setCursor(43, 0);
+    display.println("IR TEST");
+
+    display.setCursor(3, 10);
+    display.print("OFF");
+    if (menu_index == Menu::TEST_OFF) {
+        display.drawRect(0, 7, 23, 13, 1);
+    }
+
+    display.setCursor(114, 10);
+    display.print("ON");
+    if (menu_index == Menu::TEST_ON) {
+        display.drawRect(111, 7, 17, 13, 1);
+    }
+}
+
+void menuOne() {
+    // simple indicator that user is editing option
+    if (menu_editing) {
+        display.fillCircle(1, 1, 1, 1);
+    }
+
+    // top right corner
+    display.setCursor(90, 0);
+    display.printf("AC %s", air_conditioner ? "ON" : "OFF");
+
+    // on time
+    display.setCursor(3, 13);
+    display.print("ON");
+    if (menu_index == Menu::ON_TIME) {
+        display.drawRect(0, 10, 17, 13, 1);
+    }
+    display.setCursor(0, 25);
+    display.printf("%2dm/", on_time);
+
+    // off time
+    display.setCursor(24, 13);
+    display.print("OFF");
+    if (menu_index == Menu::OFF_TIME) {
+        display.drawRect(21, 10, 24, 13, 1);
+    }
+    display.setCursor(24, 25);
+    display.printf("%2dm", off_time);
+
+    // enable
+    display.setCursor(60, 13);
+    display.print("EN");
+    if (menu_index == Menu::ENABLED) {
+        display.drawRect(56, 10, 19, 13, 1);
+    }
+    display.setCursor(57, 25);
+    display.println(enabled ? "ON" : "OFF");
+
+    // sleep timer
+    display.setCursor(96, 13);
+    display.print("SLEEP");
+    if (menu_index == Menu::SLEEP) {
+        display.drawRect(93, 10, 35, 13, 1);
+    }
+    display.setCursor(96, 25);
+    display.print("/");
+}
+
 void updateScreen() {
     display.clearDisplay();
 
-    if (menu_index == Menu::TEST && menu_editing) {
-        // simple test screen
-        display.setCursor(43, 2);
-        display.println("IR TEST");
-        display.setCursor(10, 17);
-        display.println("< OFF         ON >");
-    } else {
-        // TODO simple indicator that user is editing option
-        if (menu_editing) {
-            display.fillCircle(1, 1, 1, 1);
-        }
-
-        // top right corner
-        display.setCursor(90, 0);
-        display.printf("AC %s", air_conditioner ? "ON" : "OFF");
-
-        // interval on field
-        display.setCursor(3, 13);
-        display.print("ON");
-        if (menu_index == Menu::ON_TIME) {
-            display.drawRect(0, 10, 17, 13, 1);
-        }
-
-        display.setCursor(0, 25);
-        display.printf("%dm", on_time);
-
-        // enable field (center) DO NOT MODIFY BY HAND
-        display.setCursor(46, 13);
-        display.println("ENABLE");
-        if (menu_index == Menu::ENABLED) {
-            display.drawRect(43, 10, 41, 13, 1);
-        }
-
-        display.setCursor(58, 25);
-        display.println(enabled ? "ON" : "OFF");
-
-        // interval off field
-        display.setCursor(108, 12);
-        display.print("OFF");
-        if (menu_index == Menu::OFF_TIME) {
-            display.drawRect(105, 9, 23, 13, 1);
-        }
-
-        display.setCursor(110, 25);
-        display.printf("%dm", off_time);
+    if (menu_index < PAGE_TWO) {
+        menuOne();
+    } else if (menu_index >= PAGE_TWO) {
+        menuTwo();
     }
 
     display.display();
 }
 
-bool led = false;
 void loop() {
+    noInterrupts();
     encoder.tick();
     btn.tick();
+    interrupts();
 
-    int newPos = encoder.getPosition();
+    long newPos = encoder.getPosition();
     if (pos != newPos) {
         pos = newPos;
 
@@ -147,16 +216,10 @@ void loop() {
                 case Menu::ON_TIME:
                     on_time = min(max(on_time + (int)encoder.getDirection(), MIN_ON_TIME), MAX_ON_TIME);
                     break;
-                case Menu::ENABLED:
-                    enabled = !enabled;
-                    break;
                 case Menu::OFF_TIME:
                     off_time = min(max(off_time + (int)encoder.getDirection(), MIN_OFF_TIME), MAX_OFF_TIME);
                     break;
-                case Menu::TEST: // TODO
-                    break;
             }
-
         } else {
             menu_index = min(max(menu_index + (int)encoder.getDirection(), 0), Menu::LENGTH - 1);
         }
@@ -165,11 +228,23 @@ void loop() {
     } else {
         int clicks = btn.getNumberClicks();
         if (clicks > 0) {
-            menu_editing = !menu_editing;
-            led = !led;
-            digitalWrite(13, led);
-
-            updateScreen();
+            // special cases where button does something instead of start editing
+            switch (menu_index) {
+                case Menu::ENABLED:
+                    enabled = !enabled;
+                    updateScreen();
+                    break;
+                case Menu::TEST_ON:
+                    ac_on();
+                    break;
+                case Menu::TEST_OFF:
+                    ac_off();
+                    break;
+                default:
+                    menu_editing = !menu_editing;
+                    updateScreen();
+                    break;
+            }
         }
     }
 }
