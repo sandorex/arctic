@@ -14,6 +14,8 @@
 #include <OneButton.h>
 #include <avr/wdt.h>
 #include <avr/power.h>
+#include <avr/io.h>
+#include <avr/sleep.h>
 
 #define SCREEN_ADDRESS 0x3C
 #define SSD1306_NO_SPLASH // do not show splashcreen
@@ -42,6 +44,8 @@ Adafruit_SSD1306 display(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, -1);
 RotaryEncoder encoder(ENC1, ENC2, RotaryEncoder::LatchMode::FOUR3);
 OneButton btn = OneButton(ENC_BTN, ENC_BTN_ACTIVE_LOW, ENC_BTN_PULLUP);
 
+// TODO clean this up maybe add some classes
+
 long pos = 0;
 uint8_t menu_index = Menu::ENABLED;
 
@@ -69,8 +73,12 @@ bool waiting = false;
 // which cycle in the waiting (1 cycle = 8 seconds)
 uint16_t waiting_cycles = 0;
 
+bool buttonWake = false;
+uint32_t last_interaction = millis();
+
 void updateScreen();
 void deep_sleep();
+void encoder_button();
 
 volatile bool timer = false;
 
@@ -91,7 +99,7 @@ void my_wdt_disable() {
 
 // NOTE for some reason serial and WDT clash and restart once? so just dont use serial anymore
 void setup() {
-    my_wdt_enable();
+    my_wdt_disable();
 
     ir_setup();
 
@@ -115,17 +123,15 @@ void setup() {
     display.print(F("ARCTIC " VERSION));
     display.display();
 
-    // display.ssd1306_command(SSD1306_DISPLAYOFF);
-
-    // pinMode(PIN_IR, OUTPUT);
     DDRB |= _BV(PB5);
+
+    set_sleep_mode(SLEEP_MODE_PWR_DOWN);
 
     delay(3000);
 
     // show the actual interface
     updateScreen();
 
-    // interrupts();
     // attachInterrupt(digitalPinToInterrupt(2), encoder_button, CHANGE);
 }
 
@@ -214,6 +220,7 @@ void loop() {
     long newPos = encoder.getPosition();
     if (pos != newPos) {
         pos = newPos;
+        last_interaction = millis();
 
         if (menu_editing) {
             switch (menu_index) {
@@ -232,28 +239,71 @@ void loop() {
     } else {
         int clicks = btn.getNumberClicks();
         if (clicks > 0) {
-            // special cases where button does something instead of start editing
-            switch (menu_index) {
-                case Menu::ENABLED:
-                    enabled = !enabled;
-                    updateScreen();
-                    break;
-                case Menu::TEST_ON:
-                    ac_on();
-                    break;
-                case Menu::TEST_OFF:
-                    ac_off();
-                    break;
-                default:
-                    menu_editing = !menu_editing;
-                    updateScreen();
-                    break;
+            if (!buttonWake) {
+                last_interaction = millis();
+
+                // special cases where button does something instead of start editing
+                switch (menu_index) {
+                    case Menu::ENABLED:
+                        enabled = !enabled;
+                        updateScreen();
+                        break;
+                    case Menu::TEST_ON:
+                        ac_on();
+                        break;
+                    case Menu::TEST_OFF:
+                        ac_off();
+                        break;
+                    default:
+                        menu_editing = !menu_editing;
+                        updateScreen();
+                        break;
+                }
             }
+
+            // reset the flag
+            buttonWake = false;
         }
+    }
+
+    // automatic sleep
+    if (millis() - last_interaction >= 6000) {
+        if (enabled) {
+            my_wdt_enable();
+        }
+
+        display.ssd1306_command(SSD1306_DISPLAYOFF);
+
+        // enable button interrupt
+        attachInterrupt(digitalPinToInterrupt(ENC_BTN), encoder_button, RISING);
+
+        // TODO decrement and check the timer
+        while (!buttonWake) {
+            sleep_mode();
+        }
+
+        my_wdt_disable();
+
+        // disable button interrupt
+        detachInterrupt(digitalPinToInterrupt(ENC_BTN));
+
+        // enable screen after waking
+        display.ssd1306_command(SSD1306_DISPLAYON);
     }
 }
 
+void encoder_button() {
+    // reset interaction timer
+    last_interaction = millis();
+
+    // first button press should be ignored
+    buttonWake = true;
+}
+
 ISR(WDT_vect) {
-    PORTB ^= _BV(PB5);
+    // re-set the WDT settings
     my_wdt_enable();
+
+    // TODO just visual indicator for testing
+    PORTB ^= _BV(PB5);
 }
