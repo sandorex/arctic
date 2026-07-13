@@ -74,8 +74,24 @@ void deep_sleep();
 
 volatile bool timer = false;
 
+void my_wdt_enable() {
+    noInterrupts();
+
+    MCUSR &= ~(_BV(WDRF));
+    WDTCSR |= (_BV(WDCE) | _BV(WDE));
+    WDTCSR = _BV(WDIE) | _BV(WDP3) | _BV(WDP0);
+
+    interrupts();
+}
+
+void my_wdt_disable() {
+    MCUSR = 0;
+    wdt_disable();
+}
+
+// NOTE for some reason serial and WDT clash and restart once? so just dont use serial anymore
 void setup() {
-    Serial.begin(9600);
+    my_wdt_enable();
 
     ir_setup();
 
@@ -102,21 +118,9 @@ void setup() {
     // display.ssd1306_command(SSD1306_DISPLAYOFF);
 
     // pinMode(PIN_IR, OUTPUT);
+    DDRB |= _BV(PB5);
 
     delay(3000);
-
-    // TODO it keeps resetting!
-    // noInterrupts();
-    //
-    // // NOTE intentionally after delay so if interrupt is not correctly defined it
-    // // wont reset loop
-    // // interrupt every 8s
-    // MCUSR &= ~(1 << WDRF);
-    // WDTCSR |= _BV(WDCE);
-    // // WDTCSR |= (_BV(WDCE) | _BV(WDE));
-    // WDTCSR = _BV(WDIE) | _BV(WDP3) | _BV(WDP0);
-    //
-    // interrupts();
 
     // show the actual interface
     updateScreen();
@@ -247,4 +251,9 @@ void loop() {
             }
         }
     }
+}
+
+ISR(WDT_vect) {
+    PORTB ^= _BV(PB5);
+    my_wdt_enable();
 }
