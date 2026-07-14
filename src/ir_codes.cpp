@@ -68,8 +68,8 @@ void ac_off() {
 }
 
 // TODO fan only mode (to prevent the coil from staying at very low temperatures)
-// void ac_fan() {
-//
-// }
+void ac_fan() {
+
+}
 
 #undef IR_MAX

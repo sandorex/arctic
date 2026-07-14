@@ -5,7 +5,7 @@
 #define SSD1306_NO_SPLASH // do not show splashcreen
 #include <Adafruit_SSD1306.h>
 
-const char* state_strings[] = { "ON", /* "FAN", */ "OFF" };
+const char* state_strings[] = { "OFF", "AC ON", "AC FAN", "AC OFF" };
 
 // make sure there are strings for each state
 static_assert((sizeof(state_strings) / sizeof(state_strings[0])) == (unsigned int)State::STATE_COUNT);
@@ -27,7 +27,7 @@ void menu_page_1() {
 
     // top right corner
     display.setCursor(90, 0);
-    display.printf("AC %s", state_strings[state]);
+    display.print(state_strings[state]);
 
     // on time
     display.setCursor(3, 13);
@@ -54,7 +54,7 @@ void menu_page_1() {
         display.drawRect(56, 10, 19, 13, 1);
     }
     display.setCursor(57, 25);
-    display.println(enabled ? "ON" : "OFF");
+    display.println(state == State::DISABLED ? "OFF" : "ON");
 
     // sleep timer
     display.setCursor(96, 13);
@@ -63,10 +63,10 @@ void menu_page_1() {
         display.drawRect(93, 10, 35, 13, 1);
     }
     display.setCursor(96, 25);
-    if (sleep_time == 0) {
+    if (sleep_cycles == 0) {
         display.print("OFF");
     } else {
-        display.printf("%3lum", sleep_time / MINUTE_MS);
+        display.printf("%3lum", sleep_cycles * (on_time + off_time));
     }
 }
 
@@ -88,10 +88,7 @@ void menu_page_2() {
 
     // debugging information
     display.setCursor(3, 22);
-    display.printf("CYCLE: %d", waiting_cycles);
-
-    display.setCursor(40, 22);
-    display.printf("SLP: %lu", sleep_time);
+    display.printf("C: %d / T.C: %d", cycles, timer_cycles);
 }
 
 void menu_render() {
@@ -104,6 +101,11 @@ void menu_render() {
     }
 
     display.display();
+
+    // turn on display if off
+    if (!menu_enabled) {
+        menu_on();
+    }
 }
 
 void menu_rotate(int8_t direction) {
@@ -116,8 +118,10 @@ void menu_rotate(int8_t direction) {
                 off_time = min(max(off_time + direction, MIN_OFF_TIME), MAX_OFF_TIME);
                 break;
             case Menu::SLEEP:
-                // increment by 5 minutes but in millis
-                sleep_time = max(0, sleep_time + direction * MINUTE_MS * 5);
+                sleep_cycles = max(0, sleep_cycles + direction);
+
+                // reset cycles so it does not sleep after changing
+                cycles = 0;
                 break;
         }
     } else {
@@ -131,14 +135,24 @@ void menu_button() {
     // special cases where button does something instead of start editing
     switch (menu_index) {
         case Menu::ENABLED:
-            enabled = !enabled;
+            if (state == State::DISABLED) {
+                state = State::AC_ON;
+            } else {
+                state = State::DISABLED;
+            }
+
+            update_state();
             menu_render();
             break;
         case Menu::TEST_ON:
+            noInterrupts();
             ac_on();
+            interrupts();
             break;
         case Menu::TEST_OFF:
+            noInterrupts();
             ac_off();
+            interrupts();
             break;
         default:
             menu_editing = !menu_editing;
@@ -169,9 +183,11 @@ void menu_splash() {
 
 void menu_off() {
     display.ssd1306_command(SSD1306_DISPLAYOFF);
+    menu_enabled = false;
 }
 
 void menu_on() {
     display.ssd1306_command(SSD1306_DISPLAYON);
+    menu_enabled = true;
 }
 

@@ -25,36 +25,37 @@
 enum State {
     DISABLED,
 
-    BEGINNING,
+    AC_ON,
+    AC_FAN,
     AC_OFF,
-    // AC_FAN,
-    AC_ON = BEGINNING,
 
     STATE_COUNT,
 };
 
-static uint8_t state = State::DISABLED;
+extern uint8_t state;
+extern uint8_t old_state;
+
+extern bool menu_enabled;
 
 // encoder position used to detect change
-static long pos = 0;
+extern long pos;
 
-// is the device enabled
-static bool enabled = false;
+extern uint8_t on_time;
+extern uint8_t off_time;
 
-static uint8_t on_time = 5;
-static uint8_t off_time = 25;
+// how many full cycles before turning off
+extern volatile int32_t sleep_cycles;
 
-static bool sleep_enabled = false;
+// timer cycles (each is CYCLE_TIME), when 0 is reached then state is advanced
+extern volatile uint16_t timer_cycles;
 
-// delay before going to full sleep and disabling (in seconds)
-static volatile uint32_t sleep_time = 0;
-
-// which cycle in the waiting (1 cycle = 8 seconds)
-static volatile uint16_t waiting_cycles = 0;
+// increased each time state is reset to BEGINNING
+extern volatile uint16_t cycles;
 
 // was woken up by the button
-static volatile bool buttonWake = false;
+extern volatile bool button_wake;
 
 // time when last interaction was (encoder or button)
-static volatile uint32_t last_interaction;
+extern volatile uint32_t last_interaction;
 
+void update_state();

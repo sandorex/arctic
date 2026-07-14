@@ -16,20 +16,36 @@ OneButton btn = OneButton(ENC_BTN, ENC_BTN_ACTIVE_LOW, ENC_BTN_PULLUP);
 
 void encoder_button();
 
-void next_state() {
-    // just go to next state
-    state = min(State::BEGINNING, max(state + 1, State::STATE_COUNT - 1));
+void update_state() {
+    noInterrupts();
 
     switch (state) {
         case State::DISABLED:
+            // turn off ac when disabling
+            if (old_state == State::AC_ON || old_state == State::AC_FAN) {
+                ac_off();
+            }
+
+            cycles = 0;
             break;
         case State::AC_OFF:
-            waiting_cycles = off_time / MINUTE_S / 8;
+            ac_off();
+            timer_cycles = (off_time * MINUTE_S) / 8;
             break;
         case State::AC_ON:
-            waiting_cycles = on_time / MINUTE_S / 8;
+            ac_on();
+            timer_cycles = (on_time * MINUTE_S) / 8;
+            break;
+        case State::AC_FAN:
+            timer_cycles = 2; // TODO random value
+            break;
+        default:
             break;
     }
+
+    old_state = state;
+
+    interrupts();
 }
 
 void my_wdt_enable() {
@@ -58,7 +74,7 @@ void setup() {
     delay(500);
     menu_setup();
 
-    DDRB |= _BV(PB5); // TODO temp LED for status
+    DDRB |= _BV(PB0); // TODO temp status led
 
     set_sleep_mode(SLEEP_MODE_PWR_DOWN);
 
@@ -71,10 +87,16 @@ void setup() {
 
     last_interaction = millis();
 
+    update_state();
+
     my_wdt_enable();
 }
 
 void loop() {
+    if (state != old_state) {
+        update_state();
+    }
+
     noInterrupts();
     encoder.tick();
     btn.tick();
@@ -89,19 +111,19 @@ void loop() {
     } else {
         int clicks = btn.getNumberClicks();
         if (clicks > 0) {
-            if (!buttonWake) {
+            if (!button_wake) {
                 last_interaction = millis();
                 menu_button();
             }
 
             // reset the flag
-            buttonWake = false;
+            button_wake = false;
         }
     }
 
-    // automatic sleep
+    // sleep after 6 seconds
     if (millis() - last_interaction >= 6000) {
-        if (!enabled) {
+        if (state == State::DISABLED) {
             my_wdt_disable();
         }
 
@@ -110,41 +132,18 @@ void loop() {
         // enable button interrupt
         attachInterrupt(digitalPinToInterrupt(ENC_BTN), encoder_button, RISING);
 
-        while (true) {
-            sleep_mode();
-
-            if (buttonWake) {
-                break;
-            }
-
-            // decrement waiting cycles
-            waiting_cycles = min(0, waiting_cycles - 1);
-
-            // decrement sleep time
-            sleep_time = min(0, sleep_time - CYCLE_TIME);
-
-            if (waiting_cycles == 0) {
-                // sleep time has ended
-                // TODO do not stop while AC is running!
-                if (sleep_enabled && sleep_time == 0) {
-                    enabled = false;
-                    break;
-                } else {
-                    next_state();
-                }
-            }
-
-            // small delay between sleep cycles
-            delay(1);
-        }
-
-        // re-enable wdt in case it was disabled
-        my_wdt_enable();
+        sleep_mode();
 
         // disable button interrupt
         detachInterrupt(digitalPinToInterrupt(ENC_BTN));
 
-        menu_on();
+        // re-enable wdt in case it was disabled
+        my_wdt_enable();
+
+        if (button_wake) {
+            // update menu
+            menu_render();
+        }
     }
 }
 
@@ -153,13 +152,36 @@ void encoder_button() {
     last_interaction = millis();
 
     // first button press should be ignored
-    buttonWake = true;
+    button_wake = true;
 }
 
+// the interrupt is empty as everything is done in loop
 ISR(WDT_vect) {
     // re-set the WDT settings
     my_wdt_enable();
 
-    // TODO just visual indicator for testing
-    PORTB ^= _BV(PB5);
+    // decrement waiting cycles
+    timer_cycles = min(0, timer_cycles - 1);
+
+    if (timer_cycles == 0) {
+        switch (state) {
+            case State::AC_OFF:
+                state = State::AC_ON;
+                cycles += 1;
+                break;
+            case State::AC_ON:
+                state = State::AC_FAN;
+                break;
+            case State::AC_FAN:
+                state = State::AC_OFF;
+                break;
+        }
+
+        // sleep if set and enough cycles passed
+        if (sleep_cycles > 0 && cycles >= sleep_cycles) {
+            state = State::DISABLED;
+        }
+    }
+
+    PORTB ^= _BV(PB0); // TODO temp
 }
