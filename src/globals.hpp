@@ -2,7 +2,7 @@
 
 #define VERSION "V0.1.0"
 
-#define MIN_ON_TIME 5
+#define MIN_ON_TIME 3
 #define MAX_ON_TIME 20
 
 #define MIN_OFF_TIME 10

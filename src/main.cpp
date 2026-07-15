@@ -27,16 +27,18 @@ void update_state() {
             }
 
             cycles = 0;
+            timer_cycles = 0;
             break;
         case State::AC_OFF:
             ac_off();
-            timer_cycles = (off_time * MINUTE_S) / 8;
+            timer_cycles = (off_time * MINUTE_S) / CYCLE_TIME;
             break;
         case State::AC_ON:
             ac_on();
-            timer_cycles = (on_time * MINUTE_S) / 8;
+            timer_cycles = (on_time * MINUTE_S) / CYCLE_TIME;
             break;
         case State::AC_FAN:
+            ac_fan();
             timer_cycles = 2; // TODO random value
             break;
         default:
@@ -107,14 +109,19 @@ void loop() {
         pos = newPos;
         last_interaction = millis();
 
+        menu_on();
         menu_rotate((int8_t)encoder.getDirection());
     } else {
+        // TODO ignore buttons if display is not on
         int clicks = btn.getNumberClicks();
         if (clicks > 0) {
             if (!button_wake) {
                 last_interaction = millis();
                 menu_button();
             }
+
+            menu_on();
+            menu_render();
 
             // reset the flag
             button_wake = false;
@@ -139,11 +146,6 @@ void loop() {
 
         // re-enable wdt in case it was disabled
         my_wdt_enable();
-
-        if (button_wake) {
-            // update menu
-            menu_render();
-        }
     }
 }
 
@@ -161,7 +163,9 @@ ISR(WDT_vect) {
     my_wdt_enable();
 
     // decrement waiting cycles
-    timer_cycles = min(0, timer_cycles - 1);
+    if (timer_cycles > 0) {
+        timer_cycles -= 1;
+    }
 
     if (timer_cycles == 0) {
         switch (state) {

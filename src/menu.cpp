@@ -31,67 +31,71 @@ void menu_page_1() {
 
     // on time
     display.setCursor(3, 13);
-    display.print("ON");
+    display.print(F("ON"));
     if (menu_index == Menu::ON_TIME) {
         display.drawRect(0, 10, 17, 13, 1);
     }
     display.setCursor(0, 25);
-    display.printf("%2dm/", on_time);
+    display.printf(F("%2dm/"), on_time);
 
     // off time
     display.setCursor(24, 13);
-    display.print("OFF");
+    display.print(F("OFF"));
     if (menu_index == Menu::OFF_TIME) {
         display.drawRect(21, 10, 24, 13, 1);
     }
     display.setCursor(24, 25);
-    display.printf("%2dm", off_time);
+    display.printf(F("%2dm"), off_time);
 
     // enable
     display.setCursor(60, 13);
-    display.print("EN");
+    display.print(F("EN"));
     if (menu_index == Menu::ENABLED) {
         display.drawRect(56, 10, 19, 13, 1);
     }
     display.setCursor(57, 25);
-    display.println(state == State::DISABLED ? "OFF" : "ON");
+    display.println(state == State::DISABLED ? F("OFF") : F("ON"));
 
     // sleep timer
     display.setCursor(96, 13);
-    display.print("SLEEP");
+    display.print(F("SLEEP"));
     if (menu_index == Menu::SLEEP) {
         display.drawRect(93, 10, 35, 13, 1);
     }
     display.setCursor(96, 25);
     if (sleep_cycles == 0) {
-        display.print("OFF");
+        display.print(F("OFF"));
     } else {
-        display.printf("%3lum", sleep_cycles * (on_time + off_time));
+        display.printf(F("%3lum"), sleep_cycles * (on_time + off_time));
     }
 }
 
 void menu_page_2() {
     display.setCursor(43, 0);
-    display.println("IR TEST");
+    display.println(F("IR TEST"));
 
     display.setCursor(3, 10);
-    display.print("OFF");
+    display.print(F("OFF"));
     if (menu_index == Menu::TEST_OFF) {
         display.drawRect(0, 7, 23, 13, 1);
     }
 
     display.setCursor(114, 10);
-    display.print("ON");
+    display.print(F("ON"));
     if (menu_index == Menu::TEST_ON) {
         display.drawRect(111, 7, 17, 13, 1);
     }
 
     // debugging information
     display.setCursor(3, 22);
-    display.printf("C: %d / T.C: %d", cycles, timer_cycles);
+    display.printf(F("C: %d / T.C: %d"), cycles, timer_cycles);
 }
 
 void menu_render() {
+    if (!menu_enabled) {
+        return;
+    }
+
     display.clearDisplay();
 
     if (menu_index < PAGE_TWO) {
@@ -101,11 +105,6 @@ void menu_render() {
     }
 
     display.display();
-
-    // turn on display if off
-    if (!menu_enabled) {
-        menu_on();
-    }
 }
 
 void menu_rotate(int8_t direction) {
@@ -163,7 +162,7 @@ void menu_button() {
 
 void menu_setup() {
     if(!display.begin(SSD1306_SWITCHCAPVCC, SCREEN_ADDRESS)) {
-        Serial.println("Error intializing display.. halting");
+        Serial.println(F("Error intializing display.. halting"));
         for(;;);
     }
 
@@ -182,12 +181,16 @@ void menu_splash() {
 }
 
 void menu_off() {
-    display.ssd1306_command(SSD1306_DISPLAYOFF);
-    menu_enabled = false;
+    if (menu_enabled) {
+        display.ssd1306_command(SSD1306_DISPLAYOFF);
+        menu_enabled = false;
+    }
 }
 
 void menu_on() {
-    display.ssd1306_command(SSD1306_DISPLAYON);
-    menu_enabled = true;
+    if (!menu_enabled) {
+        display.ssd1306_command(SSD1306_DISPLAYON);
+        menu_enabled = true;
+    }
 }
 
