@@ -11,6 +11,8 @@
 #include <avr/io.h>
 #include <avr/sleep.h>
 
+// TODO make sleep go to sleep on OFF state regardless of time, so it does not need to be in cycles
+
 RotaryEncoder encoder(ENC1, ENC2, RotaryEncoder::LatchMode::FOUR3);
 OneButton btn = OneButton(ENC_BTN, ENC_BTN_ACTIVE_LOW, ENC_BTN_PULLUP);
 
@@ -18,6 +20,13 @@ void encoder_button();
 
 void update_state() {
     noInterrupts();
+
+    if (old_state == State::AC_DELAY) {
+        cycles = 0;
+
+        // reset delay time
+        delay_time = 0;
+    }
 
     switch (state) {
         case State::DISABLED:
@@ -41,6 +50,12 @@ void update_state() {
             ac_fan();
             timer_cycles = 2; // TODO random value
             break;
+
+        case State::AC_DELAY:
+            cycles = 0;
+            timer_cycles = (delay_time * MINUTE_S) / CYCLE_TIME;
+            break;
+
         default:
             break;
     }
@@ -75,8 +90,6 @@ void setup() {
     // wait for display
     delay(500);
     menu_setup();
-
-    DDRB |= _BV(PB0); // TODO temp status led
 
     set_sleep_mode(SLEEP_MODE_PWR_DOWN);
 
@@ -157,7 +170,6 @@ void encoder_button() {
     button_wake = true;
 }
 
-// the interrupt is empty as everything is done in loop
 ISR(WDT_vect) {
     // re-set the WDT settings
     my_wdt_enable();
@@ -179,6 +191,10 @@ ISR(WDT_vect) {
             case State::AC_FAN:
                 state = State::AC_OFF;
                 break;
+
+            case State::AC_DELAY:
+                state = State::AC_ON;
+                break;
         }
 
         // sleep if set and enough cycles passed
@@ -186,6 +202,4 @@ ISR(WDT_vect) {
             state = State::DISABLED;
         }
     }
-
-    PORTB ^= _BV(PB0); // TODO temp
 }

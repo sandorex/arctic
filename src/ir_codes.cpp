@@ -4,6 +4,7 @@
 #include <avr/pgmspace.h>
 #include <util/delay.h>
 
+// TODO move all pins to globals.hpp
 // do not change this as all below is set specifically for pin 3
 #define PORT_IR PORTD
 #define PIN_IR 3

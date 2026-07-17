@@ -25,6 +25,8 @@
 enum State {
     DISABLED,
 
+    AC_DELAY,
+
     AC_ON,
     AC_FAN,
     AC_OFF,
@@ -45,6 +47,9 @@ extern uint8_t off_time;
 
 // how many full cycles before turning off
 extern volatile int32_t sleep_cycles;
+
+// how long to wait before turning on the AC (in minutes)
+extern int16_t delay_time;
 
 // timer cycles (each is CYCLE_TIME), when 0 is reached then state is advanced
 extern volatile uint16_t timer_cycles;

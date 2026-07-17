@@ -3,14 +3,15 @@
 #include <stdint.h>
 
 enum Menu {
-    PAGE_ONE,
-    ON_TIME = PAGE_ONE,
+    ENABLED ,
+    ON_TIME,
     OFF_TIME,
-    ENABLED,
     SLEEP,
+    DELAY,
 
-    PAGE_TWO,
-    TEST_OFF = PAGE_TWO,
+    TEST_NEXT,
+    TEST_OFF,
+    TEST_FAN,
     TEST_ON,
 
     // how many items there are

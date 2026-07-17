@@ -5,9 +5,7 @@
 #define SSD1306_NO_SPLASH // do not show splashcreen
 #include <Adafruit_SSD1306.h>
 
-const char* state_strings[] = { "OFF", "AC ON", "AC FAN", "AC OFF" };
-
-// make sure there are strings for each state
+const char* state_strings[] = { "   OFF", "DELAY", " AC ON", "AC FAN", "AC OFF" };
 static_assert((sizeof(state_strings) / sizeof(state_strings[0])) == (unsigned int)State::STATE_COUNT);
 
 // by default it uses A5 and A4 for SCK/SDA
@@ -19,89 +17,91 @@ uint8_t menu_index = Menu::ENABLED;
 // is the item being edited
 bool menu_editing = false;
 
-void menu_page_1() {
-    // simple indicator that user is editing option
-    if (menu_editing) {
-        display.fillCircle(1, 1, 1, 1);
-    }
-
-    // top right corner
-    display.setCursor(90, 0);
-    display.print(state_strings[state]);
-
-    // on time
-    display.setCursor(3, 13);
-    display.print(F("ON"));
-    if (menu_index == Menu::ON_TIME) {
-        display.drawRect(0, 10, 17, 13, 1);
-    }
-    display.setCursor(0, 25);
-    display.printf(F("%2dm/"), on_time);
-
-    // off time
-    display.setCursor(24, 13);
-    display.print(F("OFF"));
-    if (menu_index == Menu::OFF_TIME) {
-        display.drawRect(21, 10, 24, 13, 1);
-    }
-    display.setCursor(24, 25);
-    display.printf(F("%2dm"), off_time);
-
-    // enable
-    display.setCursor(60, 13);
-    display.print(F("EN"));
-    if (menu_index == Menu::ENABLED) {
-        display.drawRect(56, 10, 19, 13, 1);
-    }
-    display.setCursor(57, 25);
-    display.println(state == State::DISABLED ? F("OFF") : F("ON"));
-
-    // sleep timer
-    display.setCursor(96, 13);
-    display.print(F("SLEEP"));
-    if (menu_index == Menu::SLEEP) {
-        display.drawRect(93, 10, 35, 13, 1);
-    }
-    display.setCursor(96, 25);
-    if (sleep_cycles == 0) {
-        display.print(F("OFF"));
-    } else {
-        display.printf(F("%3lum"), sleep_cycles * (on_time + off_time));
-    }
-}
-
-void menu_page_2() {
-    display.setCursor(43, 0);
-    display.println(F("IR TEST"));
-
-    display.setCursor(3, 10);
-    display.print(F("OFF"));
-    if (menu_index == Menu::TEST_OFF) {
-        display.drawRect(0, 7, 23, 13, 1);
-    }
-
-    display.setCursor(114, 10);
-    display.print(F("ON"));
-    if (menu_index == Menu::TEST_ON) {
-        display.drawRect(111, 7, 17, 13, 1);
-    }
-
-    // debugging information
-    display.setCursor(3, 22);
-    display.printf(F("C: %d / T.C: %d"), cycles, timer_cycles);
-}
-
 void menu_render() {
     if (!menu_enabled) {
         return;
     }
 
     display.clearDisplay();
+    display.setTextSize(1);
 
-    if (menu_index < PAGE_TWO) {
-        menu_page_1();
-    } else if (menu_index >= PAGE_TWO) {
-        menu_page_2();
+    // simple indicator that user is editing option
+    if (menu_editing) {
+        display.fillCircle(1, 1, 1, 1);
+    }
+
+    // top right corner (current state)
+    display.setCursor(92, 0);
+    display.print(state_strings[state]);
+
+    if (menu_index == Menu::ON_TIME || menu_index == Menu::OFF_TIME) {
+        // highlight which option is selected
+        if (menu_index == Menu::ON_TIME) {
+            display.drawLine(16, 30, 35, 30, 1);
+        } else if (menu_index == Menu::OFF_TIME) {
+            display.drawLine(74, 30, 107, 30, 1);
+        }
+
+        display.setTextSize(2);
+        display.setCursor(14, 14);
+        display.printf(F("%02d / %2dm"), on_time, off_time);
+    } else {
+        display.setTextSize(2);
+        display.setCursor(2, 14);
+
+        switch (menu_index) {
+            case Menu::ENABLED:
+                display.print(
+                        state == State::AC_DELAY
+                            ? F("DELAYED")
+                            : (state == State::DISABLED
+                                ? F("DISABLED")
+                                : F("ENABLED")));
+                break;
+            case Menu::SLEEP:
+                if (sleep_cycles == 0) {
+                    display.print(F("SLEEP OFF"));
+                } else {
+                    unsigned long total = sleep_cycles * (on_time + off_time);
+                    int hours = total / 60;
+                    int minutes = total % 60;
+
+                    if (hours == 0) {
+                        display.printf(F("SLP %2dm"), minutes);
+                    } else {
+                        display.printf(F("SLP %2dh%2dm"), hours, minutes);
+                    }
+                }
+                break;
+            case Menu::DELAY:
+                if (delay_time == 0) {
+                    display.print(F("DELAY OFF"));
+                } else {
+                    int hours = delay_time / 60;
+                    int minutes = delay_time % 60;
+
+                    if (hours == 0) {
+                        display.printf(F("DEL %2dm"), minutes);
+                    } else {
+                        display.printf(F("DEL %2dh%2dm"), hours, minutes);
+                    }
+                }
+                break;
+            case Menu::TEST_NEXT:
+                display.print(F("NEXT STATE"));
+                break;
+            case Menu::TEST_ON:
+                display.print(F("IR ON"));
+                break;
+            case Menu::TEST_FAN:
+                display.print(F("IR FAN"));
+                break;
+            case Menu::TEST_OFF:
+                display.print(F("IR OFF"));
+                break;
+            case Menu::ON_TIME: case Menu::OFF_TIME:
+                break;
+        }
     }
 
     display.display();
@@ -122,6 +122,14 @@ void menu_rotate(int8_t direction) {
                 // reset cycles so it does not sleep after changing
                 cycles = 0;
                 break;
+            case Menu::DELAY:
+                // prevent editing delay while its active
+                if (state != State::AC_DELAY) {
+                    // increment 5 at a time as it does not make sense to sleep that precisely
+                    delay_time = max(0, delay_time + direction * 5);
+                }
+
+                break;
         }
     } else {
         menu_index = min(max(menu_index + direction, 0), Menu::LENGTH - 1);
@@ -135,7 +143,12 @@ void menu_button() {
     switch (menu_index) {
         case Menu::ENABLED:
             if (state == State::DISABLED) {
-                state = State::AC_ON;
+                // start delay
+                if (delay_time > 0) {
+                    state = State::AC_DELAY;
+                } else {
+                    state = State::AC_ON;
+                }
             } else {
                 state = State::DISABLED;
             }
@@ -143,9 +156,32 @@ void menu_button() {
             update_state();
             menu_render();
             break;
+        case Menu::TEST_NEXT:
+            // TODO this should not be hardcoded here
+            switch (state) {
+                case State::AC_ON:
+                    state = State::AC_FAN;
+                    break;
+                case State::AC_FAN:
+                    state = State::AC_OFF;
+                    break;
+                case State::AC_OFF:
+                    state = State::AC_ON;
+                    break;
+
+                case State::AC_DELAY:
+                    state = State::AC_ON;
+                    break;
+            }
+            break;
         case Menu::TEST_ON:
             noInterrupts();
             ac_on();
+            interrupts();
+            break;
+        case Menu::TEST_FAN:
+            noInterrupts();
+            ac_fan();
             interrupts();
             break;
         case Menu::TEST_OFF:
@@ -193,4 +229,3 @@ void menu_on() {
         menu_enabled = true;
     }
 }
-
