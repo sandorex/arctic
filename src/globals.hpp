@@ -8,8 +8,8 @@
 #define MIN_OFF_TIME 10
 #define MAX_OFF_TIME 50
 
-#define ENC1 4
-#define ENC2 7
+#define ENC1 A3
+#define ENC2 A2
 #define ENC_BTN 2
 #define ENC_BTN_ACTIVE_LOW true
 #define ENC_BTN_PULLUP true
