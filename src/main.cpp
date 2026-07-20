@@ -85,8 +85,6 @@ void setup() {
     my_wdt_disable();
     power_adc_disable(); // power saving as i dont use it
 
-    ir_setup();
-
     // wait for display
     delay(500);
     menu_setup();

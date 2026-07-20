@@ -8,7 +8,8 @@
 const char* state_strings[] = { "   OFF", "DELAY", " AC ON", "AC FAN", "AC OFF" };
 static_assert((sizeof(state_strings) / sizeof(state_strings[0])) == (unsigned int)State::STATE_COUNT);
 
-// by default it uses A5 and A4 for SCK/SDA
+// TODO move the pin assignment to globals
+// by default it uses A5 and A4 for SCL/SDA
 Adafruit_SSD1306 display(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, -1);
 
 // current menu index
