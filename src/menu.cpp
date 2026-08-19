@@ -1,4 +1,5 @@
 #include "menu.hpp"
+#include "esp_attr.h"
 #include "ir_codes.hpp"
 #include "globals.hpp"
 
@@ -6,23 +7,21 @@
 #include <Adafruit_SSD1306.h>
 
 const char* state_strings[] = { "   OFF", "DELAY", " AC ON", "AC FAN", "AC OFF" };
-static_assert((sizeof(state_strings) / sizeof(state_strings[0])) == (unsigned int)State::STATE_COUNT);
-
-// TODO move the pin assignment to globals
-// by default it uses A5 and A4 for SCL/SDA
-Adafruit_SSD1306 display(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, -1);
+static_assert((sizeof(state_strings) / sizeof(state_strings[0])) == (unsigned int)State::STATE_COUNT, "state count and state_strings count differ");
 
 // current menu index
 uint8_t menu_index = Menu::ENABLED;
+
+// NOTE pins are defined by Wire.begin
+Adafruit_SSD1306 display(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, -1);
 
 // is the item being edited
 bool menu_editing = false;
 
 void menu_render() {
-    if (!menu_enabled) {
-        return;
-    }
-
+    // if (!menu_enabled) {
+    //     return;
+    // }
     display.clearDisplay();
     display.setTextSize(1);
 
@@ -45,7 +44,7 @@ void menu_render() {
 
         display.setTextSize(2);
         display.setCursor(14, 14);
-        display.printf(F("%02d / %2dm"), on_time, off_time);
+        display.printf("%02d / %2dm", on_time, off_time);
     } else {
         display.setTextSize(2);
         display.setCursor(2, 14);
@@ -54,10 +53,10 @@ void menu_render() {
             case Menu::ENABLED:
                 display.print(
                         state == State::AC_DELAY
-                            ? F("DELAYED")
-                            : (state == State::DISABLED
-                                ? F("DISABLED")
-                                : F("ENABLED")));
+                            ? "DELAYED"
+                            : (state == State::OFF
+                                ? "DISABLED"
+                                : "ENABLED"));
                 break;
             case Menu::SLEEP:
                 if (sleep_cycles == 0) {
@@ -68,9 +67,9 @@ void menu_render() {
                     int minutes = total % 60;
 
                     if (hours == 0) {
-                        display.printf(F("SLP %2dm"), minutes);
+                        display.printf("SLP %2dm", minutes);
                     } else {
-                        display.printf(F("SLP %2dh%2dm"), hours, minutes);
+                        display.printf("SLP %2dh%2dm", hours, minutes);
                     }
                 }
                 break;
@@ -82,9 +81,9 @@ void menu_render() {
                     int minutes = delay_time % 60;
 
                     if (hours == 0) {
-                        display.printf(F("DEL %2dm"), minutes);
+                        display.printf("DEL %2dm", minutes);
                     } else {
-                        display.printf(F("DEL %2dh%2dm"), hours, minutes);
+                        display.printf("DEL %2dh%2dm", hours, minutes);
                     }
                 }
                 break;
@@ -143,7 +142,7 @@ void menu_button() {
     // special cases where button does something instead of start editing
     switch (menu_index) {
         case Menu::ENABLED:
-            if (state == State::DISABLED) {
+            if (state == State::OFF) {
                 // start delay
                 if (delay_time > 0) {
                     state = State::AC_DELAY;
@@ -151,7 +150,7 @@ void menu_button() {
                     state = State::AC_ON;
                 }
             } else {
-                state = State::DISABLED;
+                state = State::OFF;
             }
 
             update_state();
@@ -199,7 +198,7 @@ void menu_button() {
 
 void menu_setup() {
     if(!display.begin(SSD1306_SWITCHCAPVCC, SCREEN_ADDRESS)) {
-        Serial.println(F("Error intializing display.. halting"));
+        Serial.println(F("Error intializing display.. halting")); // TODO this could give problems when serial is not enabled
         for(;;);
     }
 
@@ -208,25 +207,39 @@ void menu_setup() {
 }
 
 void menu_splash() {
+    esp_reset_reason_t reset_reason = esp_reset_reason();
+    esp_sleep_wakeup_cause_t wakeup_reason = esp_sleep_get_wakeup_cause();
+
     // splash screen
     display.clearDisplay();
     display.setTextSize(1);
     display.setTextColor(WHITE);
     display.setCursor(25, 12);
     display.print(F("ARCTIC " VERSION));
+    display.setCursor(0, 0);
+
+    // display code only if not powered on
+    if (reset_reason != ESP_RST_POWERON) {
+        display.printf("CODE: %d / %d", reset_reason, wakeup_reason);
+    }
+
     display.display();
 }
 
 void menu_off() {
-    if (menu_enabled) {
+    // if (menu_enabled) {
         display.ssd1306_command(SSD1306_DISPLAYOFF);
         menu_enabled = false;
-    }
+    // }
 }
 
 void menu_on() {
-    if (!menu_enabled) {
+    // if (!menu_enabled) {
         display.ssd1306_command(SSD1306_DISPLAYON);
         menu_enabled = true;
-    }
+    // }
+}
+
+void menu_flush() {
+    display.flush();
 }

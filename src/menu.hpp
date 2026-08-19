@@ -3,7 +3,7 @@
 #include <stdint.h>
 
 enum Menu {
-    ENABLED ,
+    ENABLED,
     ON_TIME,
     OFF_TIME,
     SLEEP,
@@ -25,3 +25,4 @@ void menu_rotate(int8_t direction);
 void menu_button();
 void menu_off();
 void menu_on();
+void menu_flush();
