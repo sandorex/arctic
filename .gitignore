@@ -1,3 +1,7 @@
 .pio
+*.bak
+*.kicad_prl
+~*
 .cache/
+kicad/.history/
 compile_commands.json

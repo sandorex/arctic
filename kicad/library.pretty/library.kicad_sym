@@ -1,0 +1,1081 @@
+(kicad_symbol_lib
+	(version 20251024)
+	(generator "kicad_symbol_editor")
+	(generator_version "10.0")
+	(symbol "WEMOS_ESP32_S2_Mini"
+		(pin_numbers
+			(hide yes)
+		)
+		(pin_names
+			(offset 0)
+		)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(in_pos_files yes)
+		(duplicate_pin_numbers_are_jumpers yes)
+		(property "Reference" "U1"
+			(at -9.906 -15.24 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Value" "WEMOS_ESP32_S2_Mini"
+			(at -0.508 -13.208 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Footprint" "library:WEMOS_S2_mini"
+			(at 0.508 19.558 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(hide yes)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Datasheet" "https://documentation.espressif.com/esp32-s2-mini-1_esp32-s2-mini-1u_datasheet_en.pdf"
+			(at 0.508 21.844 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(hide yes)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Description" ""
+			(at 0 0 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(hide yes)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "ki_keywords" "connector"
+			(at 0 0 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(hide yes)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "ki_fp_filters" "Connector*:*_2x??_*"
+			(at 0 0 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(hide yes)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(symbol "WEMOS_ESP32_S2_Mini_1_1"
+			(rectangle
+				(start -19.05 8.89)
+				(end -13.97 -11.43)
+				(stroke
+					(width 0.254)
+					(type default)
+				)
+				(fill
+					(type background)
+				)
+			)
+			(rectangle
+				(start -19.05 7.747)
+				(end -17.78 7.493)
+				(stroke
+					(width 0.1524)
+					(type default)
+				)
+				(fill
+					(type none)
+				)
+			)
+			(rectangle
+				(start -19.05 5.207)
+				(end -17.78 4.953)
+				(stroke
+					(width 0.1524)
+					(type default)
+				)
+				(fill
+					(type none)
+				)
+			)
+			(rectangle
+				(start -19.05 2.667)
+				(end -17.78 2.413)
+				(stroke
+					(width 0.1524)
+					(type default)
+				)
+				(fill
+					(type none)
+				)
+			)
+			(rectangle
+				(start -19.05 0.127)
+				(end -17.78 -0.127)
+				(stroke
+					(width 0.1524)
+					(type default)
+				)
+				(fill
+					(type none)
+				)
+			)
+			(rectangle
+				(start -19.05 -2.413)
+				(end -17.78 -2.667)
+				(stroke
+					(width 0.1524)
+					(type default)
+				)
+				(fill
+					(type none)
+				)
+			)
+			(rectangle
+				(start -19.05 -4.953)
+				(end -17.78 -5.207)
+				(stroke
+					(width 0.1524)
+					(type default)
+				)
+				(fill
+					(type none)
+				)
+			)
+			(rectangle
+				(start -19.05 -7.493)
+				(end -17.78 -7.747)
+				(stroke
+					(width 0.1524)
+					(type default)
+				)
+				(fill
+					(type none)
+				)
+			)
+			(rectangle
+				(start -19.05 -10.033)
+				(end -17.78 -10.287)
+				(stroke
+					(width 0.1524)
+					(type default)
+				)
+				(fill
+					(type none)
+				)
+			)
+			(rectangle
+				(start -13.97 7.747)
+				(end -15.24 7.493)
+				(stroke
+					(width 0.1524)
+					(type default)
+				)
+				(fill
+					(type none)
+				)
+			)
+			(rectangle
+				(start -13.97 5.207)
+				(end -15.24 4.953)
+				(stroke
+					(width 0.1524)
+					(type default)
+				)
+				(fill
+					(type none)
+				)
+			)
+			(rectangle
+				(start -13.97 2.667)
+				(end -15.24 2.413)
+				(stroke
+					(width 0.1524)
+					(type default)
+				)
+				(fill
+					(type none)
+				)
+			)
+			(rectangle
+				(start -13.97 0.127)
+				(end -15.24 -0.127)
+				(stroke
+					(width 0.1524)
+					(type default)
+				)
+				(fill
+					(type none)
+				)
+			)
+			(rectangle
+				(start -13.97 -2.413)
+				(end -15.24 -2.667)
+				(stroke
+					(width 0.1524)
+					(type default)
+				)
+				(fill
+					(type none)
+				)
+			)
+			(rectangle
+				(start -13.97 -4.953)
+				(end -15.24 -5.207)
+				(stroke
+					(width 0.1524)
+					(type default)
+				)
+				(fill
+					(type none)
+				)
+			)
+			(rectangle
+				(start -13.97 -7.493)
+				(end -15.24 -7.747)
+				(stroke
+					(width 0.1524)
+					(type default)
+				)
+				(fill
+					(type none)
+				)
+			)
+			(rectangle
+				(start -13.97 -10.033)
+				(end -15.24 -10.287)
+				(stroke
+					(width 0.1524)
+					(type default)
+				)
+				(fill
+					(type none)
+				)
+			)
+			(rectangle
+				(start 13.97 8.89)
+				(end 19.05 -11.43)
+				(stroke
+					(width 0.254)
+					(type default)
+				)
+				(fill
+					(type background)
+				)
+			)
+			(rectangle
+				(start 13.97 7.747)
+				(end 15.24 7.493)
+				(stroke
+					(width 0.1524)
+					(type default)
+				)
+				(fill
+					(type none)
+				)
+			)
+			(rectangle
+				(start 13.97 5.207)
+				(end 15.24 4.953)
+				(stroke
+					(width 0.1524)
+					(type default)
+				)
+				(fill
+					(type none)
+				)
+			)
+			(rectangle
+				(start 13.97 2.667)
+				(end 15.24 2.413)
+				(stroke
+					(width 0.1524)
+					(type default)
+				)
+				(fill
+					(type none)
+				)
+			)
+			(rectangle
+				(start 13.97 0.127)
+				(end 15.24 -0.127)
+				(stroke
+					(width 0.1524)
+					(type default)
+				)
+				(fill
+					(type none)
+				)
+			)
+			(rectangle
+				(start 13.97 -2.413)
+				(end 15.24 -2.667)
+				(stroke
+					(width 0.1524)
+					(type default)
+				)
+				(fill
+					(type none)
+				)
+			)
+			(rectangle
+				(start 13.97 -4.953)
+				(end 15.24 -5.207)
+				(stroke
+					(width 0.1524)
+					(type default)
+				)
+				(fill
+					(type none)
+				)
+			)
+			(rectangle
+				(start 13.97 -7.493)
+				(end 15.24 -7.747)
+				(stroke
+					(width 0.1524)
+					(type default)
+				)
+				(fill
+					(type none)
+				)
+			)
+			(rectangle
+				(start 13.97 -10.033)
+				(end 15.24 -10.287)
+				(stroke
+					(width 0.1524)
+					(type default)
+				)
+				(fill
+					(type none)
+				)
+			)
+			(rectangle
+				(start 19.05 7.747)
+				(end 17.78 7.493)
+				(stroke
+					(width 0.1524)
+					(type default)
+				)
+				(fill
+					(type none)
+				)
+			)
+			(rectangle
+				(start 19.05 5.207)
+				(end 17.78 4.953)
+				(stroke
+					(width 0.1524)
+					(type default)
+				)
+				(fill
+					(type none)
+				)
+			)
+			(rectangle
+				(start 19.05 2.667)
+				(end 17.78 2.413)
+				(stroke
+					(width 0.1524)
+					(type default)
+				)
+				(fill
+					(type none)
+				)
+			)
+			(rectangle
+				(start 19.05 0.127)
+				(end 17.78 -0.127)
+				(stroke
+					(width 0.1524)
+					(type default)
+				)
+				(fill
+					(type none)
+				)
+			)
+			(rectangle
+				(start 19.05 -2.413)
+				(end 17.78 -2.667)
+				(stroke
+					(width 0.1524)
+					(type default)
+				)
+				(fill
+					(type none)
+				)
+			)
+			(rectangle
+				(start 19.05 -4.953)
+				(end 17.78 -5.207)
+				(stroke
+					(width 0.1524)
+					(type default)
+				)
+				(fill
+					(type none)
+				)
+			)
+			(rectangle
+				(start 19.05 -7.493)
+				(end 17.78 -7.747)
+				(stroke
+					(width 0.1524)
+					(type default)
+				)
+				(fill
+					(type none)
+				)
+			)
+			(rectangle
+				(start 19.05 -10.033)
+				(end 17.78 -10.287)
+				(stroke
+					(width 0.1524)
+					(type default)
+				)
+				(fill
+					(type none)
+				)
+			)
+			(pin passive line
+				(at -7.62 7.62 180)
+				(length 6.35)
+				(name "GPIO1"
+					(effects
+						(font
+							(size 0.762 0.762)
+						)
+					)
+				)
+				(number "1"
+					(effects
+						(font
+							(size 0.762 0.762)
+						)
+					)
+				)
+				(alternate "ADC1_0" input line)
+				(alternate "TOUCH1" input line)
+			)
+			(pin passive line
+				(at -7.62 5.08 180)
+				(length 6.35)
+				(name "GPIO2"
+					(effects
+						(font
+							(size 0.762 0.762)
+						)
+					)
+				)
+				(number "2"
+					(effects
+						(font
+							(size 0.762 0.762)
+						)
+					)
+				)
+				(alternate "ADC1_1" input line)
+				(alternate "TOUCH2" passive line)
+			)
+			(pin passive line
+				(at -25.4 5.08 0)
+				(length 6.35)
+				(name "GPIO3"
+					(effects
+						(font
+							(size 0.762 0.762)
+						)
+					)
+				)
+				(number "3"
+					(effects
+						(font
+							(size 0.762 0.762)
+						)
+					)
+				)
+				(alternate "ADC1_2" passive line)
+				(alternate "TOUCH3" passive line)
+			)
+			(pin passive line
+				(at -7.62 2.54 180)
+				(length 6.35)
+				(name "GPIO4"
+					(effects
+						(font
+							(size 0.762 0.762)
+						)
+					)
+				)
+				(number "4"
+					(effects
+						(font
+							(size 0.762 0.762)
+						)
+					)
+				)
+				(alternate "ADC1_3" input line)
+				(alternate "TOUCH4" passive line)
+			)
+			(pin passive line
+				(at -25.4 2.54 0)
+				(length 6.35)
+				(name "GPIO5"
+					(effects
+						(font
+							(size 0.762 0.762)
+						)
+					)
+				)
+				(number "5"
+					(effects
+						(font
+							(size 0.762 0.762)
+						)
+					)
+				)
+				(alternate "ADC1_4" passive line)
+				(alternate "TOUCH5" passive line)
+			)
+			(pin passive line
+				(at -7.62 0 180)
+				(length 6.35)
+				(name "GPIO6"
+					(effects
+						(font
+							(size 0.762 0.762)
+						)
+					)
+				)
+				(number "6"
+					(effects
+						(font
+							(size 0.762 0.762)
+						)
+					)
+				)
+				(alternate "ADC1_5" passive line)
+				(alternate "TOUCH6" passive line)
+			)
+			(pin passive line
+				(at -25.4 0 0)
+				(length 6.35)
+				(name "GPIO7"
+					(effects
+						(font
+							(size 0.762 0.762)
+						)
+					)
+				)
+				(number "7"
+					(effects
+						(font
+							(size 0.762 0.762)
+						)
+					)
+				)
+				(alternate "ADC1_6" passive line)
+				(alternate "TOUCH7" passive line)
+			)
+			(pin passive line
+				(at -7.62 -2.54 180)
+				(length 6.35)
+				(name "GPIO8"
+					(effects
+						(font
+							(size 0.762 0.762)
+						)
+					)
+				)
+				(number "8"
+					(effects
+						(font
+							(size 0.762 0.762)
+						)
+					)
+				)
+				(alternate "ADC1_7" input line)
+				(alternate "TOUCH8" passive line)
+			)
+			(pin passive line
+				(at -25.4 -2.54 0)
+				(length 6.35)
+				(name "GPIO9"
+					(effects
+						(font
+							(size 0.762 0.762)
+						)
+					)
+				)
+				(number "9"
+					(effects
+						(font
+							(size 0.762 0.762)
+						)
+					)
+				)
+				(alternate "ADC1_8" passive line)
+				(alternate "TOUCH9" passive line)
+			)
+			(pin passive line
+				(at -7.62 -5.08 180)
+				(length 6.35)
+				(name "GPIO10"
+					(effects
+						(font
+							(size 0.762 0.762)
+						)
+					)
+				)
+				(number "10"
+					(effects
+						(font
+							(size 0.762 0.762)
+						)
+					)
+				)
+				(alternate "ADC1_9" passive line)
+				(alternate "TOUCH10" passive line)
+			)
+			(pin passive line
+				(at -25.4 -5.08 0)
+				(length 6.35)
+				(name "GPIO11"
+					(effects
+						(font
+							(size 0.762 0.762)
+						)
+					)
+				)
+				(number "11"
+					(effects
+						(font
+							(size 0.762 0.762)
+						)
+					)
+				)
+				(alternate "ADC2_0" passive line)
+				(alternate "TOUCH11" passive line)
+			)
+			(pin passive line
+				(at -25.4 -7.62 0)
+				(length 6.35)
+				(name "GPIO12"
+					(effects
+						(font
+							(size 0.762 0.762)
+						)
+					)
+				)
+				(number "12"
+					(effects
+						(font
+							(size 0.762 0.762)
+						)
+					)
+				)
+				(alternate "ADC2_1" passive line)
+				(alternate "TOUCH12" passive line)
+			)
+			(pin passive line
+				(at -7.62 -7.62 180)
+				(length 6.35)
+				(name "GPIO13"
+					(effects
+						(font
+							(size 0.762 0.762)
+						)
+					)
+				)
+				(number "13"
+					(effects
+						(font
+							(size 0.762 0.762)
+						)
+					)
+				)
+				(alternate "ADC2_2" passive line)
+				(alternate "TOUCH13" passive line)
+			)
+			(pin passive line
+				(at -7.62 -10.16 180)
+				(length 6.35)
+				(name "GPIO14"
+					(effects
+						(font
+							(size 0.762 0.762)
+						)
+					)
+				)
+				(number "14"
+					(effects
+						(font
+							(size 0.762 0.762)
+						)
+					)
+				)
+				(alternate "ADC2_3" passive line)
+				(alternate "TOUCH14" passive line)
+			)
+			(pin passive line
+				(at 7.62 -10.16 0)
+				(length 6.35)
+				(name "GPIO15"
+					(effects
+						(font
+							(size 0.762 0.762)
+						)
+					)
+				)
+				(number "15"
+					(effects
+						(font
+							(size 0.762 0.762)
+						)
+					)
+				)
+				(alternate "ADC2_4" passive line)
+				(alternate "LED" passive line)
+			)
+			(pin passive line
+				(at 25.4 -5.08 180)
+				(length 6.35)
+				(name "GPIO16"
+					(effects
+						(font
+							(size 0.762 0.762)
+						)
+					)
+				)
+				(number "16"
+					(effects
+						(font
+							(size 0.762 0.762)
+						)
+					)
+				)
+				(alternate "ADC2_5" passive line)
+			)
+			(pin passive line
+				(at 7.62 -5.08 0)
+				(length 6.35)
+				(name "GPIO17"
+					(effects
+						(font
+							(size 0.762 0.762)
+						)
+					)
+				)
+				(number "17"
+					(effects
+						(font
+							(size 0.762 0.762)
+						)
+					)
+				)
+				(alternate "ADC2_6" passive line)
+				(alternate "DAC_1" passive line)
+			)
+			(pin passive line
+				(at 25.4 -2.54 180)
+				(length 6.35)
+				(name "GPIO18"
+					(effects
+						(font
+							(size 0.762 0.762)
+						)
+					)
+				)
+				(number "18"
+					(effects
+						(font
+							(size 0.762 0.762)
+						)
+					)
+				)
+				(alternate "ADC2_7" passive line)
+				(alternate "DAC_2" passive line)
+			)
+			(pin passive line
+				(at 7.62 -2.54 0)
+				(length 6.35)
+				(name "GPIO21"
+					(effects
+						(font
+							(size 0.762 0.762)
+						)
+					)
+				)
+				(number "21"
+					(effects
+						(font
+							(size 0.762 0.762)
+						)
+					)
+				)
+			)
+			(pin passive line
+				(at 25.4 0 180)
+				(length 6.35)
+				(name "GPIO33"
+					(effects
+						(font
+							(size 0.762 0.762)
+						)
+					)
+				)
+				(number "33"
+					(effects
+						(font
+							(size 0.762 0.762)
+						)
+					)
+				)
+			)
+			(pin passive line
+				(at 7.62 0 0)
+				(length 6.35)
+				(name "GPIO34"
+					(effects
+						(font
+							(size 0.762 0.762)
+						)
+					)
+				)
+				(number "34"
+					(effects
+						(font
+							(size 0.762 0.762)
+						)
+					)
+				)
+			)
+			(pin passive line
+				(at 25.4 2.54 180)
+				(length 6.35)
+				(name "GPIO35"
+					(effects
+						(font
+							(size 0.762 0.762)
+						)
+					)
+				)
+				(number "35"
+					(effects
+						(font
+							(size 0.762 0.762)
+						)
+					)
+				)
+			)
+			(pin passive line
+				(at 7.62 2.54 0)
+				(length 6.35)
+				(name "GPIO36"
+					(effects
+						(font
+							(size 0.762 0.762)
+						)
+					)
+				)
+				(number "36"
+					(effects
+						(font
+							(size 0.762 0.762)
+						)
+					)
+				)
+			)
+			(pin passive line
+				(at 25.4 5.08 180)
+				(length 6.35)
+				(name "GPIO37"
+					(effects
+						(font
+							(size 0.762 0.762)
+						)
+					)
+				)
+				(number "37"
+					(effects
+						(font
+							(size 0.762 0.762)
+						)
+					)
+				)
+			)
+			(pin passive line
+				(at 7.62 5.08 0)
+				(length 6.35)
+				(name "GPIO38"
+					(effects
+						(font
+							(size 0.762 0.762)
+						)
+					)
+				)
+				(number "38"
+					(effects
+						(font
+							(size 0.762 0.762)
+						)
+					)
+				)
+			)
+			(pin passive line
+				(at 25.4 7.62 180)
+				(length 6.35)
+				(name "GPIO39"
+					(effects
+						(font
+							(size 0.762 0.762)
+						)
+					)
+				)
+				(number "39"
+					(effects
+						(font
+							(size 0.762 0.762)
+						)
+					)
+				)
+			)
+			(pin passive line
+				(at 7.62 7.62 0)
+				(length 6.35)
+				(name "GPIO40"
+					(effects
+						(font
+							(size 0.762 0.762)
+						)
+					)
+				)
+				(number "40"
+					(effects
+						(font
+							(size 0.762 0.762)
+						)
+					)
+				)
+			)
+			(pin passive line
+				(at 25.4 -10.16 180)
+				(length 6.35)
+				(name "VBUS"
+					(effects
+						(font
+							(size 0.762 0.762)
+						)
+					)
+				)
+				(number "47"
+					(effects
+						(font
+							(size 0.762 0.762)
+						)
+					)
+				)
+			)
+			(pin passive line
+				(at 7.62 -7.62 0)
+				(length 6.35)
+				(name "GND"
+					(effects
+						(font
+							(size 0.762 0.762)
+						)
+					)
+				)
+				(number "48"
+					(effects
+						(font
+							(size 0.762 0.762)
+						)
+					)
+				)
+			)
+			(pin passive line
+				(at 25.4 -7.62 180)
+				(length 6.35)
+				(name "GND"
+					(effects
+						(font
+							(size 0.762 0.762)
+						)
+					)
+				)
+				(number "48"
+					(effects
+						(font
+							(size 0.762 0.762)
+						)
+					)
+				)
+			)
+			(pin passive line
+				(at -25.4 -10.16 0)
+				(length 6.35)
+				(name "3V3"
+					(effects
+						(font
+							(size 0.762 0.762)
+						)
+					)
+				)
+				(number "49"
+					(effects
+						(font
+							(size 0.762 0.762)
+						)
+					)
+				)
+			)
+			(pin input inverted
+				(at -25.4 7.62 0)
+				(length 6.35)
+				(name "EN"
+					(effects
+						(font
+							(size 0.762 0.762)
+						)
+					)
+				)
+				(number "50"
+					(effects
+						(font
+							(size 0.762 0.762)
+						)
+					)
+				)
+			)
+		)
+		(embedded_fonts no)
+	)
+)
