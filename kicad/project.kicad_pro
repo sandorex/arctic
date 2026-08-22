@@ -680,7 +680,7 @@
         "uuid": "a6b88667-e353-40b9-90c0-14fa11be69bc"
       }
     ],
-    "used_designators": "SW1,IC1A1,J1-2,IC1B1,R1-7,D1,BT1-4,#PWR1-12,Q1-5,U1-2",
+    "used_designators": "SW1,IC1A1,J1-2,IC1B1,R1-8,D1,BT1-4,#PWR1-12,Q1-5,U1-2",
     "variants": []
   },
   "sheets": [
