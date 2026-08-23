@@ -1,4 +1,6 @@
 #include "menu.hpp"
+#include "driver/rtc_io.h"
+#include "esp32-hal-gpio.h"
 #include "esp_attr.h"
 #include "ir_codes.hpp"
 #include "globals.hpp"
@@ -19,9 +21,6 @@ Adafruit_SSD1306 display(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, -1);
 bool menu_editing = false;
 
 void menu_render() {
-    // if (!menu_enabled) {
-    //     return;
-    // }
     display.clearDisplay();
     display.setTextSize(1);
 
@@ -85,6 +84,13 @@ void menu_render() {
                     } else {
                         display.printf("DEL %2dh%2dm", hours, minutes);
                     }
+                }
+                break;
+            case Menu::FULLY_OFF:
+                if (fully_off) {
+                    display.printf("FAN M. OFF");
+                } else {
+                    display.printf("FAN M. ON");
                 }
                 break;
             case Menu::TEST_NEXT:
@@ -156,6 +162,10 @@ void menu_button() {
             update_state();
             menu_render();
             break;
+        case Menu::FULLY_OFF:
+            fully_off = !fully_off;
+            menu_render();
+            break;
         case Menu::TEST_NEXT:
             // TODO this should not be hardcoded here
             switch (state) {
@@ -173,6 +183,8 @@ void menu_button() {
                     state = State::AC_ON;
                     break;
             }
+            update_state();
+            menu_render();
             break;
         case Menu::TEST_ON:
             noInterrupts();
@@ -197,10 +209,25 @@ void menu_button() {
 }
 
 void menu_setup() {
-    if(!display.begin(SSD1306_SWITCHCAPVCC, SCREEN_ADDRESS)) {
-        Serial.println(F("Error intializing display.. halting")); // TODO this could give problems when serial is not enabled
+    pinMode(SCREEN_PWR_PIN, OUTPUT);
+    digitalWrite(SCREEN_PWR_PIN, HIGH);
+
+    // turn on the display power
+    SERIAL_PRINTF("Initializing display\n");
+
+    // let display charge the capacitors
+    delay(500);
+
+    Wire.begin(SCREEN_SDA, SCREEN_SCL);
+
+    if(!display.begin(SSD1306_SWITCHCAPVCC, SCREEN_ADDRESS, false, false)) {
+        SERIAL_PRINTF("Error intializing display.. halting\n");
         for(;;);
     }
+
+    // clear it imidiately or its gonna show garbage
+    display.clearDisplay();
+    display.display();
 
     // dim to lower power consumption
     display.dim(true);
@@ -216,30 +243,36 @@ void menu_splash() {
     display.setTextColor(WHITE);
     display.setCursor(25, 12);
     display.print(F("ARCTIC " VERSION));
-    display.setCursor(0, 0);
 
     // display code only if not powered on
     if (reset_reason != ESP_RST_POWERON) {
+        display.setCursor(0, 0);
         display.printf("CODE: %d / %d", reset_reason, wakeup_reason);
     }
 
+    // show voltage in top right
+    display.setCursor(98, 0);
+    display.printf("%.2fV", get_vcc());
+
     display.display();
+
+    // show for 5 more seconds if it was not restarted
+    if (reset_reason != ESP_RST_POWERON) {
+        delay(5000);
+    }
 }
 
 void menu_off() {
-    // if (menu_enabled) {
-        display.ssd1306_command(SSD1306_DISPLAYOFF);
-        menu_enabled = false;
-    // }
+    display.ssd1306_command(SSD1306_DISPLAYOFF);
+    menu_enabled = false;
 }
 
 void menu_on() {
-    // if (!menu_enabled) {
-        display.ssd1306_command(SSD1306_DISPLAYON);
-        menu_enabled = true;
-    // }
+    display.ssd1306_command(SSD1306_DISPLAYON);
+    menu_enabled = true;
 }
 
+// TODO remove this
 void menu_flush() {
     display.flush();
 }
