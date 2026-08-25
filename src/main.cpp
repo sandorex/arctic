@@ -97,6 +97,7 @@ void setup() {
 }
 
 void loop() {
+    // TODO this may be useless and also old_state
     if (state != old_state) {
         update_state();
     }
@@ -132,8 +133,10 @@ void loop() {
         }
     }
 
+    // TODO if fully_off use AC_FAN and then AC_OFF, otherwise use only
+    // AC_FAN or AC_OFF
     // update state if time has passed
-    if (millis() >= state_millis + (timer_seconds * 1000)) {
+    if (state_millis > 0 && millis() >= state_millis + (timer_seconds * 1000)) {
         switch (state) {
             case State::AC_OFF:
                 state = State::AC_ON;
@@ -176,7 +179,7 @@ void update_state() {
         switch (state) {
             case State::OFF:
                 // turn off ac when disabling
-                if (old_state == State::AC_ON || old_state == State::AC_FAN) {
+                if (old_state == State::AC_ON || old_state == State::AC_FAN || (old_state == AC_OFF && !fully_off)) {
                     ac_off();
                 }
 
