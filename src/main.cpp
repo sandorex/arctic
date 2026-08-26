@@ -45,9 +45,6 @@ OneButton btn = OneButton(ENC_BTN, ENC_BTN_ACTIVE_LOW, ENC_BTN_PULLUP);
 uint32_t millis_rtc();
 void encoder_button();
 void update_state();
-void IRAM_ATTR onTimer();
-
-uint32_t state_millis = 0;
 
 void setup() {
     #ifdef DEBUG
@@ -133,10 +130,8 @@ void loop() {
         }
     }
 
-    // TODO if fully_off use AC_FAN and then AC_OFF, otherwise use only
-    // AC_FAN or AC_OFF
     // update state if time has passed
-    if (state_millis > 0 && millis() >= state_millis + (timer_seconds * 1000)) {
+    if (timer_seconds > 0 && millis() >= state_millis + (timer_seconds * 1000)) {
         switch (state) {
             case State::AC_OFF:
                 state = State::AC_ON;
@@ -146,7 +141,12 @@ void loop() {
                 state = State::AC_FAN;
                 break;
             case State::AC_FAN:
-                state = State::AC_OFF;
+                if (fully_off) {
+                    state = State::AC_OFF;
+                } else {
+                    state = State::AC_ON;
+                    cycles += 1;
+                }
                 break;
 
             case State::AC_DELAY:
@@ -165,6 +165,7 @@ void loop() {
 void update_state() {
     noInterrupts();
 
+    // when coming out of the delay reset everything just in case
     if (old_state == State::AC_DELAY) {
         cycles = 0;
 
@@ -175,53 +176,54 @@ void update_state() {
     // sleep if set and enough cycles passed
     if (sleep_cycles > 0 && cycles >= sleep_cycles) {
         state = State::OFF;
-    } else {
-        switch (state) {
-            case State::OFF:
-                // turn off ac when disabling
-                if (old_state == State::AC_ON || old_state == State::AC_FAN || (old_state == AC_OFF && !fully_off)) {
-                    ac_off();
-                }
+    }
 
-                cycles = 0;
-                timer_seconds = 0;
-                break;
-            case State::AC_OFF:
-                if (fully_off) {
-                    ac_off();
-                }
-                timer_seconds = (off_time * MINUTE_S);
-                break;
-            case State::AC_ON:
-                ac_on();
-                timer_seconds = (on_time * MINUTE_S);
-                break;
-            case State::AC_FAN:
-                ac_fan();
-                // blow for a minute to cool down the coils
-                timer_seconds = 60; // TODO define global
-                break;
+    switch (state) {
+        case State::OFF:
+            // turn off ac when disabling
+            if (old_state == State::AC_ON || old_state == State::AC_FAN) {
+                ac_off();
+            }
 
-            case State::AC_DELAY:
-                cycles = 0;
-                timer_seconds = delay_time * MINUTE_S;
-                break;
+            cycles = 0;
+            timer_seconds = 0;
+            break;
+        case State::AC_OFF:
+            ac_off();
 
-            default:
-                break;
-        }
+            // subtract the fan mode duration
+            timer_seconds = off_time * MINUTE_S - COIL_REST_TIME;
+            break;
+        case State::AC_ON:
+            ac_on();
+            timer_seconds = (on_time * MINUTE_S);
+            break;
+
+        case State::AC_FAN:
+            // let fan heat up the coils to prevent condensation
+            ac_fan();
+
+            // if not turning off the ac then just run in AC_FAN whole time
+            if (fully_off) {
+                timer_seconds = COIL_REST_TIME;
+            } else {
+                timer_seconds = off_time * MINUTE_S;
+            }
+            break;
+
+        case State::AC_DELAY:
+            cycles = 0;
+            timer_seconds = delay_time * MINUTE_S;
+            break;
+
+        default:
+            break;
     }
 
     old_state = state;
     state_millis = millis();
 
     interrupts();
-}
-
-void onTimer() {
-
-    // TODO move to state switching so it turns it off after AC_FAN or AC_ON
-    // }
 }
 
 // TODO calibrate it properly
@@ -237,38 +239,3 @@ uint32_t millis_rtc() {
     // calculate milliseconds
     return (tv.tv_sec * 1000UL + tv.tv_usec / 1000UL);
 }
-
-// ISR(WDT_vect) {
-//     // re-set the WDT settings
-//     my_wdt_enable();
-//
-//     // decrement waiting cycles
-//     if (timer_cycles > 0) {
-//         timer_cycles -= 1;
-//     }
-//
-//     if (timer_cycles == 0) {
-//         switch (state) {
-//             case State::AC_OFF:
-//                 state = State::AC_ON;
-//                 cycles += 1;
-//                 break;
-//             case State::AC_ON:
-//                 state = State::AC_FAN;
-//                 break;
-//             case State::AC_FAN:
-//                 state = State::AC_OFF;
-//                 break;
-//
-//             case State::AC_DELAY:
-//                 state = State::AC_ON;
-//                 break;
-//         }
-//
-//         // TODO move to state switching so it turns it off after AC_FAN or AC_ON
-//         // sleep if set and enough cycles passed
-//         if (sleep_cycles > 0 && cycles >= sleep_cycles) {
-//             state = State::OFF;
-//         }
-//     }
-// }

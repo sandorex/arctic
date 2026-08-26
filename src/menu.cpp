@@ -56,6 +56,16 @@ void menu_render() {
                             : (state == State::OFF
                                 ? "DISABLED"
                                 : "ENABLED"));
+
+                display.setTextSize(1);
+                display.setCursor(0, 0);
+                {
+                    float remaining = ceilf((timer_seconds - ((millis() - state_millis) / 1000.0)) / 60.0);
+                    if (remaining > 0 && state != State::OFF) {
+                        display.printf("%0.fm", remaining);
+                    }
+                }
+                // display.printf("%0.fm / %0.fm", floorf((millis() - state_millis) / 1000.0 / 60.0), floorf(timer_seconds / 60.0));
                 break;
             case Menu::SLEEP:
                 if (sleep_cycles == 0) {
@@ -167,24 +177,9 @@ void menu_button() {
             menu_render();
             break;
         case Menu::TEST_NEXT:
-            // TODO this should not be hardcoded here
-            switch (state) {
-                case State::AC_ON:
-                    state = State::AC_FAN;
-                    break;
-                case State::AC_FAN:
-                    state = State::AC_OFF;
-                    break;
-                case State::AC_OFF:
-                    state = State::AC_ON;
-                    break;
-
-                case State::AC_DELAY:
-                    state = State::AC_ON;
-                    break;
-            }
-            update_state();
-            menu_render();
+            // fast forward the state to be 5 seconds from now
+            state_millis = millis();
+            timer_seconds = 5;
             break;
         case Menu::TEST_ON:
             noInterrupts();
@@ -224,6 +219,11 @@ void menu_setup() {
         SERIAL_PRINTF("Error intializing display.. halting\n");
         for(;;);
     }
+
+#ifdef SCREEN_FLIP
+    // flip display by 180 degrees
+    display.setRotation(2);
+#endif
 
     // clear it imidiately or its gonna show garbage
     display.clearDisplay();
@@ -270,6 +270,7 @@ void menu_off() {
 void menu_on() {
     display.ssd1306_command(SSD1306_DISPLAYON);
     menu_enabled = true;
+    menu_index = Menu::ENABLED;
 }
 
 // TODO remove this

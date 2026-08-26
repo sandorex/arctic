@@ -8,6 +8,7 @@ bool menu_enabled = true;
 
 long pos = 0;
 
+uint32_t state_millis = 0;
 uint8_t RTC_DATA_ATTR on_time = 5;
 uint8_t RTC_DATA_ATTR off_time = 25;
 int16_t RTC_DATA_ATTR delay_time = 0;

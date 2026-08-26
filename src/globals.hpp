@@ -32,12 +32,14 @@
 #define SCREEN_PWR_PIN 37
 #define SCREEN_SDA 33
 #define SCREEN_SCL 35
+#define SCREEN_FLIP
 
 #define SCREEN_WIDTH 128
 #define SCREEN_HEIGHT 32
 #define SCREEN_ADDRESS 0x3C
 
-#define CYCLE_TIME 60
+// time to wait before turning the AC off completely
+#define COIL_REST_TIME 60
 #define MINUTE_MS 60000
 #define MINUTE_S 60
 
@@ -69,6 +71,8 @@ extern RTC_DATA_ATTR uint8_t off_time;
 
 // how many full cycles before turning off
 extern RTC_DATA_ATTR volatile int32_t sleep_cycles;
+
+extern uint32_t state_millis;
 
 // how long to wait before turning on the AC (in minutes)
 extern RTC_DATA_ATTR int16_t delay_time;
