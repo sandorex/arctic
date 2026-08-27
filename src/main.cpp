@@ -191,8 +191,8 @@ void update_state() {
         case State::AC_OFF:
             ac_off();
 
-            // subtract the fan mode duration
-            timer_seconds = off_time * MINUTE_S - COIL_REST_TIME;
+            // subtract the fan mode duration (NOTE prevent OFF state with less than 5 minutes)
+            timer_seconds = max(5 * MINUTE_S, off_time * MINUTE_S - rest_time_s);
             break;
         case State::AC_ON:
             ac_on();
@@ -205,7 +205,7 @@ void update_state() {
 
             // if not turning off the ac then just run in AC_FAN whole time
             if (fully_off) {
-                timer_seconds = COIL_REST_TIME;
+                timer_seconds = rest_time_s;
             } else {
                 timer_seconds = off_time * MINUTE_S;
             }

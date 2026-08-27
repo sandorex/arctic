@@ -96,6 +96,9 @@ void menu_render() {
                     }
                 }
                 break;
+            case Menu::REST_TIME:
+                display.printf("REST %ds", rest_time_s);
+                break;
             case Menu::FULLY_OFF:
                 if (fully_off) {
                     display.printf("FAN M. OFF");
@@ -145,6 +148,9 @@ void menu_rotate(int8_t direction) {
                     delay_time = max(0, delay_time + direction * 5);
                 }
 
+                break;
+            case Menu::REST_TIME:
+                rest_time_s = min(max(30, rest_time_s + direction * 5), 360);
                 break;
         }
     } else {

@@ -8,6 +8,7 @@ enum Menu {
     OFF_TIME,
     SLEEP,
     DELAY,
+    REST_TIME,
     FULLY_OFF,
 
     TEST_NEXT,

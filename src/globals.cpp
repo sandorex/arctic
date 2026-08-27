@@ -11,6 +11,7 @@ long pos = 0;
 uint32_t state_millis = 0;
 uint8_t RTC_DATA_ATTR on_time = 5;
 uint8_t RTC_DATA_ATTR off_time = 25;
+uint16_t RTC_DATA_ATTR rest_time_s = COIL_REST_TIME;
 int16_t RTC_DATA_ATTR delay_time = 0;
 bool fully_off = true;
 volatile RTC_DATA_ATTR int32_t sleep_cycles = 0;

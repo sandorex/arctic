@@ -13,7 +13,7 @@
 
 #define VERSION "V0.1.1"
 
-#define MIN_ON_TIME 3
+#define MIN_ON_TIME 2
 #define MAX_ON_TIME 20
 
 #define MIN_OFF_TIME 10
@@ -68,6 +68,7 @@ extern bool fully_off;
 
 extern RTC_DATA_ATTR uint8_t on_time;
 extern RTC_DATA_ATTR uint8_t off_time;
+extern RTC_DATA_ATTR uint16_t rest_time_s;
 
 // how many full cycles before turning off
 extern RTC_DATA_ATTR volatile int32_t sleep_cycles;
