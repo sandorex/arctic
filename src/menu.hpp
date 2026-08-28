@@ -10,6 +10,8 @@ enum Menu {
     DELAY,
     REST_TIME,
     FULLY_OFF,
+    SPEED_COOL,
+    SPEED_FAN,
 
     TEST_NEXT,
     TEST_OFF,

@@ -11,6 +11,9 @@
 const char* state_strings[] = { "   OFF", "DELAY", " AC ON", "AC FAN", "AC OFF" };
 static_assert((sizeof(state_strings) / sizeof(state_strings[0])) == (unsigned int)State::STATE_COUNT, "state count and state_strings count differ");
 
+const char* speed_strings[] = { "AUTO", "MUTE", "LOW", "MED", "HIGH" };
+static_assert((sizeof(speed_strings) / sizeof(speed_strings[0])) == 5, "speed_strings count does not match fan speed states");
+
 // current menu index
 uint8_t menu_index = Menu::ENABLED;
 
@@ -106,6 +109,12 @@ void menu_render() {
                     display.printf("FAN M. ON");
                 }
                 break;
+            case Menu::SPEED_COOL:
+                display.printf("FAN C %s", speed_strings[speed_cool]);
+                break;
+            case Menu::SPEED_FAN:
+                display.printf("FAN F %s", speed_strings[speed_fan]);
+                break;
             case Menu::TEST_NEXT:
                 display.print(F("NEXT STATE"));
                 break;
@@ -151,6 +160,12 @@ void menu_rotate(int8_t direction) {
                 break;
             case Menu::REST_TIME:
                 rest_time_s = min(max(30, rest_time_s + direction * 5), 360);
+                break;
+            case Menu::SPEED_COOL:
+                speed_cool = min(max(0, speed_cool + direction), 4);
+                break;
+            case Menu::SPEED_FAN:
+                speed_fan = min(max(0, speed_fan + direction), 4);
                 break;
         }
     } else {
