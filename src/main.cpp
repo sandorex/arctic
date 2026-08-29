@@ -36,7 +36,6 @@ fully discharge
 help with oled resetting
 */
 
-// TODO delay between FAN and off should be 1.5min minimum
 // TODO make sleep go to sleep on OFF state regardless of time, so it does not need to be in cycles
 
 RotaryEncoder encoder(ENC1, ENC2, RotaryEncoder::LatchMode::FOUR3);

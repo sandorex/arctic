@@ -291,7 +291,10 @@ void menu_off() {
 void menu_on() {
     display.ssd1306_command(SSD1306_DISPLAYON);
     menu_enabled = true;
+
+    // reset menu state
     menu_index = Menu::ENABLED;
+    menu_editing = false;
 }
 
 // TODO remove this

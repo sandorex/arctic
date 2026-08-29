@@ -39,7 +39,7 @@
 #define SCREEN_ADDRESS 0x3C
 
 // time to wait before turning the AC off completely
-#define COIL_REST_TIME 60
+#define COIL_REST_TIME 90
 #define MINUTE_MS 60000
 #define MINUTE_S 60
 
