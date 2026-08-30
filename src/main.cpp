@@ -93,7 +93,6 @@ void setup() {
 }
 
 void loop() {
-    // TODO this may be useless and also old_state
     if (state != old_state) {
         update_state();
     }
@@ -175,6 +174,9 @@ void update_state() {
     // sleep if set and enough cycles passed
     if (sleep_cycles > 0 && cycles >= sleep_cycles) {
         state = State::OFF;
+
+        // reset sleep after successful sleep
+        sleep_cycles = 0;
     }
 
     switch (state) {
