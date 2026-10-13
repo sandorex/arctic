@@ -58,6 +58,9 @@ enum State {
 extern volatile uint8_t state;
 extern volatile uint8_t old_state;
 
+// whether cooling or heating
+extern bool cool_mode;
+
 extern bool menu_enabled;
 
 // encoder position used to detect change
@@ -70,6 +73,7 @@ extern RTC_DATA_ATTR uint8_t on_time;
 extern RTC_DATA_ATTR uint8_t off_time;
 extern RTC_DATA_ATTR uint16_t rest_time_s;
 extern RTC_DATA_ATTR uint8_t speed_cool;
+extern RTC_DATA_ATTR uint8_t speed_heat;
 extern RTC_DATA_ATTR uint8_t speed_fan;
 
 // how many full cycles before turning off

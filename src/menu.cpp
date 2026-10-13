@@ -62,13 +62,16 @@ void menu_render() {
 
                 display.setTextSize(1);
                 display.setCursor(0, 0);
+                display.print(cool_mode ? "C " : "H ");
                 {
                     float remaining = ceilf((timer_seconds - ((millis() - state_millis) / 1000.0)) / 60.0);
                     if (remaining > 0 && state != State::OFF) {
                         display.printf("%0.fm", remaining);
                     }
                 }
-                // display.printf("%0.fm / %0.fm", floorf((millis() - state_millis) / 1000.0 / 60.0), floorf(timer_seconds / 60.0));
+                break;
+            case Menu::MODE:
+                display.print(cool_mode ? "COOL MODE" : "HEAT MODE");
                 break;
             case Menu::SLEEP:
                 if (sleep_cycles == 0) {
@@ -103,14 +106,17 @@ void menu_render() {
                 display.printf("REST %ds", rest_time_s);
                 break;
             case Menu::FULLY_OFF:
-                if (fully_off) {
-                    display.printf("FAN M. OFF");
-                } else {
-                    display.printf("FAN M. ON");
-                }
+                display.setTextSize(1);
+                display.setCursor(16, 12);
+                display.println("KEEP FAN RUNNING");
+                display.setCursor(58, 22);
+                display.println(fully_off ? "OFF" : "ON");
                 break;
             case Menu::SPEED_COOL:
                 display.printf("FAN C %s", speed_strings[speed_cool]);
+                break;
+            case Menu::SPEED_HEAT:
+                display.printf("FAN H %s", speed_strings[speed_heat]);
                 break;
             case Menu::SPEED_FAN:
                 display.printf("FAN F %s", speed_strings[speed_fan]);
@@ -164,6 +170,9 @@ void menu_rotate(int8_t direction) {
             case Menu::SPEED_COOL:
                 speed_cool = min(max(0, speed_cool + direction), 4);
                 break;
+            case Menu::SPEED_HEAT:
+                speed_heat = min(max(0, speed_heat + direction), 4);
+                break;
             case Menu::SPEED_FAN:
                 speed_fan = min(max(0, speed_fan + direction), 4);
                 break;
@@ -191,6 +200,10 @@ void menu_button() {
             }
 
             update_state();
+            menu_render();
+            break;
+        case Menu::MODE:
+            cool_mode = !cool_mode;
             menu_render();
             break;
         case Menu::FULLY_OFF:

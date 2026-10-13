@@ -4,6 +4,7 @@
 volatile uint8_t state = State::OFF;
 volatile uint8_t old_state = State::OFF;
 
+bool cool_mode = true;
 bool menu_enabled = true;
 
 long pos = 0;
@@ -11,7 +12,8 @@ long pos = 0;
 uint32_t state_millis = 0;
 uint8_t RTC_DATA_ATTR on_time = 5;
 uint8_t RTC_DATA_ATTR off_time = 25;
-uint8_t RTC_DATA_ATTR speed_cool = 2;
+uint8_t RTC_DATA_ATTR speed_cool = 2; // 1 bar
+uint8_t RTC_DATA_ATTR speed_heat = 4; // 3 bars
 uint8_t RTC_DATA_ATTR speed_fan = 2;
 uint16_t RTC_DATA_ATTR rest_time_s = COIL_REST_TIME;
 int16_t RTC_DATA_ATTR delay_time = 0;

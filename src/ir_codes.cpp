@@ -38,9 +38,17 @@ void set_fan_speed(uint8_t speed) {
 }
 
 void ac_on() {
-    ac.setMode(kTcl112AcCool);
-    set_fan_speed(speed_cool);
-    ac.setTemp(22);
+    // NOTE temperatures are intentionally in extremes to make sure it heats/cools when needed
+    if (cool_mode) {
+        ac.setMode(kTcl112AcCool);
+        set_fan_speed(speed_cool);
+        ac.setTemp(22);
+    } else {
+        ac.setMode(kTcl112AcHeat);
+        set_fan_speed(speed_heat);
+        ac.setTemp(28);
+    }
+
     ac.setPower(true);
     ac.setLight(sleep_cycles == 0); // shut off display if sleep is enabled
     ac.send();

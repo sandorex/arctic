@@ -6,11 +6,13 @@ enum Menu {
     ENABLED,
     ON_TIME,
     OFF_TIME,
+    MODE,
     SLEEP,
     DELAY,
     REST_TIME,
     FULLY_OFF,
     SPEED_COOL,
+    SPEED_HEAT,
     SPEED_FAN,
 
     TEST_NEXT,
